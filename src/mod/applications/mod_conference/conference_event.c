@@ -39,7 +39,7 @@
  * mod_conference.c -- Software Conference Bridge
  *
  */
-#include <mod_conference.h>
+#include "mod_conference.h"
 
 
 static cJSON *get_canvas_info(mcu_canvas_t *canvas)
