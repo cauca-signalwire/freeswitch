@@ -48,6 +48,7 @@ SWITCH_MODULE_DEFINITION(mod_sofia, mod_sofia_load, mod_sofia_shutdown, NULL);
 struct mod_sofia_globals mod_sofia_globals;
 switch_endpoint_interface_t *sofia_endpoint_interface;
 
+#define NONE ((void *) -1)
 #define STRLEN 15
 
 void mod_sofia_shutdown_cleanup();
@@ -1531,6 +1532,7 @@ static switch_status_t sofia_receive_message(switch_core_session_t *session, swi
 		char *ref_by;
 		const char *from_host = switch_channel_get_variable(channel, "sip_from_host");
 		const char *from_user = switch_channel_get_variable(channel, "sip_from_user");
+		const char *call_info_override = switch_channel_get_variable(tech_pvt->channel, "sip_h_Call-Info");
 		const char *replaced_call_id;
 		const char *replaced_from_uri;
 		const char *replaced_to_tag;
@@ -1569,7 +1571,10 @@ static switch_status_t sofia_receive_message(switch_core_session_t *session, swi
 			switch_channel_set_variable(channel, SOFIA_REFER_3PCC_HANGUP_VARIABLE, uuid_to_refer);
 			nua_refer(tech_pvt->nh, SIPTAG_REFER_TO_STR(ref_to), SIPTAG_REFERRED_BY_STR(ref_by),
 					  TAG_IF(!zstr(session_id_header), SIPTAG_HEADER_STR(session_id_header)),
+					  TAG_IF(!zstr(call_info_override), SIPTAG_CALL_INFO(SOFIA_NULL_HEADER)),
+					  TAG_IF(!zstr(call_info_override), SIPTAG_CALL_INFO_STR(call_info_override)),
 					  TAG_END());
+
 			switch_safe_free(ref_to);
 			switch_safe_free(ref_by);
 		}
