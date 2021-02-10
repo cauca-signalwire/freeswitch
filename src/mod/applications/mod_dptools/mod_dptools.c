@@ -1187,6 +1187,45 @@ SWITCH_STANDARD_APP(flush_dtmf_function)
 	switch_channel_flush_dtmf(switch_core_session_get_channel(session));
 }
 
+#define refer_3pcc_DESC "Send a REFER with Replace: to <uuid> specifying to replace the caller specified in <uuid-to-refer>"
+#define refer_3pcc_SYNTAX "<uuid> <uuid-to-refer>"
+SWITCH_STANDARD_APP(refer_3pcc_function)
+{
+	char *argv[1] = { 0 };
+	int argc = 0;
+	char *mydata;
+	char *uuid_to_refer = argv[0];
+	switch_core_session_t *session_to_send_refer = session;
+	switch_core_session_t *session_to_refer;
+
+	mydata = switch_core_session_strdup(session, data);
+	argc = switch_split(mydata, ' ', argv);
+
+	if (argc < 1 || zstr(argv[0])) {
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "%s refer_3pcc error USAGE: %s\n",
+		                  switch_core_session_get_name(session), refer_3pcc_SYNTAX);
+		return;
+	}
+
+	session_to_refer = switch_core_session_locate(uuid_to_refer);
+
+	if (session_to_refer) {
+		switch_core_session_message_t msg = {0};
+
+		/* Tell sofia to refer the channel */
+		msg.from = __FILE__;
+		msg.pointer_arg = &mydata;
+		msg.message_id = SWITCH_MESSAGE_INDICATE_REFER_3PCC;
+		switch_core_session_receive_message(session_to_send_refer, &msg);
+		switch_core_session_rwunlock(session_to_refer);
+	} else {
+		switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_NOTICE, "%s refer_3pcc error session UUID not found: %s\n",
+		                  switch_core_session_get_name(session), uuid_to_refer);
+	}
+
+	switch_safe_free(mydata);
+}
+
 SWITCH_STANDARD_APP(transfer_function)
 {
 	int argc;
