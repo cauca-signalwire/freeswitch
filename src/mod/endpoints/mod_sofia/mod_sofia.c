@@ -1566,6 +1566,7 @@ static switch_status_t sofia_receive_message(switch_core_session_t *session, swi
 			switch_log_printf(SWITCH_CHANNEL_SESSION_LOG(session), SWITCH_LOG_DEBUG, "(%s) Referring %s: %s\n",
 							  switch_channel_get_name(channel), uuid_to_refer, ref_to);
 
+			switch_channel_set_variable(channel, SOFIA_REFER_3PCC_HANGUP_VARIABLE, uuid_to_refer);
 			nua_refer(tech_pvt->nh, SIPTAG_REFER_TO_STR(ref_to), SIPTAG_REFERRED_BY_STR(ref_by),
 					  TAG_IF(!zstr(session_id_header), SIPTAG_HEADER_STR(session_id_header)),
 					  TAG_END());
